@@ -1,0 +1,84 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Crontab-login</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        *{
+            margin:0px;
+            padding:0px;
+        }
+        #container{
+            width:500px;
+            height:300px;
+            margin:0 auto;
+            margin-top:100px;
+        }
+        .text-center{
+            text-align: center;
+        }
+        .login-froms{
+            width:60%;
+            margin:0 auto;
+        }
+    </style>
+</head>
+<body>
+<div id="container" class="well">
+    <h2 class="text-center">Crontab</h2><hr/>
+    <div class="login-froms">
+        <div class="form-group">
+            <div class="col-sm-10">
+                <input type="text" class="form-control" name="username" style="width:250px;" placeholder="username">
+            </div>
+        </div>
+        <br/><br/>
+        <div class="form-group">
+            <div class="col-sm-10">
+                <input type="password" class="form-control" name="password" style="width:250px;" placeholder="password">
+            </div>
+        </div>
+        <br/><br/>
+        <button class="btn btn-default" id="reset-btn" style="width:80px;margin-left:15px;" type="reset">重置</button>
+        <button class="btn btn-default" id="submit-btn" style="width:80px;margin-left:87px;" type="submit">登录</button>
+    </div>
+</div>
+
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/toast.js"></script>
+<script>
+$(function(){
+    $('#reset-btn').click(function() {
+        $('[name=username]').val('');
+        $('[name=password]').val('');
+    });
+
+    $('#submit-btn').click(function() {
+        var username = $('[name=username]').val();
+        var password = $('[name=password]').val();
+        if(username == undefined || username == '') {
+            new Toast({context:$('body'),top:200 ,time:2000, message:'请填写用户名'}).error();
+            return false;
+        }
+        if(password == undefined || password == '') {
+            new Toast({context:$('body'),top:200 ,time:2000, message:'请填写密码'}).error();
+        }
+        $.post('/admin/doLogin',{"username":username, "password":password}, function(ret) {
+            if(ret.en == 200) {
+                new Toast({context:$('body'),top:200 ,time:2000 ,message:'登录成功'}).success();
+                setTimeout(function(){
+                    window.location.href = '/';
+                } , 1000);
+            } else {
+                new Toast({context:$('body'),top:200 ,time:2000, message:ret.em}).error();
+            }
+        });
+    });
+});
+</script>
+</body>
+</html>

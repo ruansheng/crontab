@@ -1,0 +1,235 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Crontab-tasks</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        *{
+            margin:0px;
+            padding:0px;
+        }
+        #container{
+            width:80%;
+            min-height: auto;
+            margin:0 auto;
+            margin-top:90px;
+        }
+
+		/* 添加 模态框 */
+        .addTask{
+            height:50px;
+        }
+        .addTask button{
+            width:100px;
+            float:right;
+            margin-right:23px;
+        }
+
+        #table-data{
+            margin-top:20px;
+			text-align:center;
+        }
+
+    </style>
+</head>
+<body>
+
+{{template "header.html" .}}
+<div id="container">
+    <div class="addTask">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addTaskModal">添加任务</button>
+    </div>
+    <table id="table-data" class="table table-bordered table-hover">
+        <tr class="active" id="table-header-label" style="font-weight:bold;">
+            <td style="width:20%;">任务名称</td>
+            <td style="width:15%;">执行时间</td>
+            <td style="width:30%;">命令</td>
+            <td style="width:20%;">运行机器</td>
+			<td style="width:15%;">操作</td>
+        </tr>
+		{{range $key, $val := .list}}
+			<tr class="active">
+				<td>{{$val.name}}</td>
+				<td>{{$val.exectime}}</td>
+				<td>{{$val.cmd}}</td>	
+				<td>localhost</td>
+				<td>
+					<button type="button" class="btn btn-primary editTaskModal" dataid="{{$val.dataid}}" dataname="{{$val.name}}" dataexectime="{{$val.exectime}}" datacmd="{{$val.cmd}}">编辑</button>
+					<button type="button" class="btn btn-primary removeTaskModal" dataid="{{$val.dataid}}">删除</button>
+				</td>
+			</tr>
+		{{end}}
+    </table>
+</div>
+
+<!-- addTask Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="addTaskModalLabel">添加任务</h4>
+            </div>
+            <div class="modal-body">
+                <h5>任务名称</h5>
+                <input id="add-task-name" class="form-control" type="text" placeholder="任务名称" style="width:300px;">
+                <h5>执行时间</h5>
+                <input id="add-task-exectime" class="form-control" type="text" placeholder="执行时间" style="width:300px;">
+				<h5>命令</h5>
+                <input id="add-task-cmd" class="form-control" type="text" placeholder="命令" style="width:300px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="add-save-task-params" type="button" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editTaskModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="editTaskModal">编辑任务</h4>
+            </div>
+            <div class="modal-body">
+				<input id="edit_dataid" type="hidden" value="">
+				<h5>任务名称</h5>
+                <input id="edit-task-name" class="form-control" type="text" placeholder="任务名称" style="width:300px;">
+                <h5>执行时间</h5>
+                <input id="edit-task-exectime" class="form-control" type="text" placeholder="执行时间" style="width:300px;">
+				<h5>命令</h5>
+                <input id="edit-task-cmd" class="form-control" type="text" placeholder="命令" style="width:300px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				<button id="edit-task" type="button" class="btn btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- remove Modal -->
+<div class="modal fade" id="removeModal" tabindex="-1" role="dialog" aria-labelledby="removeTaskModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="removeTaskModal">删除任务</h4>
+            </div>
+            <div class="modal-body">
+				确定要删除任务?
+				<input id="remove_dataid" type="hidden" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				<button id="remove-task" type="button" class="btn btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/toast.js"></script>
+
+<script>
+    $(function(){
+		/** 点击 保存添加任务 */
+        $('#add-save-task-params').click(function() {
+			var task_name = $('#add-task-name').val();
+			var task_exectime = $('#add-task-exectime').val();
+			var task_cmd = $('#add-task-cmd').val();
+            var url = '/task/add';
+            var data = {
+                task_name: task_name,
+				task_exectime: task_exectime,
+				task_cmd: task_cmd,
+            };
+            $.post(url, data, function (resp) {
+                if (resp.en != 200) {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).error();
+                } else {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).success();
+					setTimeout(function(){
+						window.location.reload();	
+					}, 1000);
+                }
+            });                   
+        });
+		
+		/** "显示编辑" 触发模态框显示 */
+        $('.editTaskModal').on('click', function () {
+            var dataid = $(this).attr('dataid');
+			var dataname = $(this).attr('dataname');
+			var dataexectime = $(this).attr('dataexectime');
+			var datacmd = $(this).attr('datacmd');
+            $('#edit_dataid').val(dataid);
+			$('#edit-task-name').val(dataname);
+			$('#edit-task-exectime').val(dataexectime);
+			$('#edit-task-cmd').val(datacmd);
+			$('#editModal').modal('show');
+        });
+		
+		/** 点击 保存编辑任务 */
+        $('#edit-task').click(function() {
+			var dataid = $('#edit_dataid').val();
+			var dataname = $('#edit-task-name').val();
+			var dataexectime = $('#edit-task-exectime').val();
+			var datacmd = $('#edit-task-cmd').val();
+            var url = '/task/edit';
+            var data = {
+                dataid: dataid,
+				task_name: dataname,
+				task_exectime: dataexectime,
+				task_cmd: datacmd,
+            };
+			console.log(data);
+            $.post(url, data, function (resp) {
+                if (resp.en != 200) {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).error();
+                } else {
+                   new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).success();
+					setTimeout(function(){
+						window.location.reload();	
+					}, 1000);
+                }
+            });                   
+        });
+		
+		/** "显示删除" 触发模态框显示 */
+        $('.removeTaskModal').on('click', function () {
+            var dataid = $(this).attr('dataid');
+            $('#remove_dataid').val(dataid);
+			$('#removeModal').modal('show');
+        });
+		
+		/** 点击 删除任务 */
+        $('#remove-task').click(function() {
+			var dataid = $('#remove_dataid').val();
+            var url = '/task/remove';
+            var data = {
+                dataid: dataid
+            };
+            $.post(url, data, function (resp) {
+                if (resp.en != 200) {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).error();
+                } else {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).success();
+					setTimeout(function(){
+						window.location.reload();	
+					}, 1000);
+                }
+            });                   
+        });
+		
+    });
+</script>
+
+</body>
+</html>

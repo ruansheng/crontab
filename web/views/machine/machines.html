@@ -1,0 +1,244 @@
+<!doctype html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Crontab-machina</title>
+    <link href="/static/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+        *{
+            margin:0px;
+            padding:0px;
+        }
+        #container{
+            width:80%;
+            min-height: auto;
+            margin:0 auto;
+            margin-top:90px;
+        }
+
+		/* 添加 模态框 */
+        .addMachine{
+            height:50px;
+        }
+        .addMachine button{
+            width:100px;
+            float:right;
+            margin-right:23px;
+        }
+
+        #table-data{
+            margin-top:20px;
+			text-align:center;
+        }
+    </style>
+</head>
+<body>
+
+{{template "header.html" .}}
+<div id="container">
+    <div class="addMachine">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#addMachineModal">添加机器</button>
+    </div>
+    <table id="table-data" class="table table-bordered table-hover">
+        <tr class="active" id="table-header-label" style="font-weight:bold;">
+            <td style="width:20%;">机器名称</td>
+            <td style="width:20%;">主机名</td>
+            <td style="width:20%;">主机IP</td>
+            <td style="width:20%;">运行账号</td>
+			<td style="width:20%;">操作</td>
+        </tr>
+		{{range $key, $val := .list}}
+			<tr class="info">
+				<td>{{$val.name}}</td>
+				<td>{{$val.hostname}}</td>
+				<td>{{$val.ip}}</td>	
+				<td>{{$val.account}}</td>
+				<td>
+					<button type="button" class="btn btn-primary editMachineModal" dataid="{{$val.dataid}}" dataname="{{$val.name}}" datahostname="{{$val.hostname}}" dataip="{{$val.ip}}" dataaccount="{{$val.account}}">编辑</button>
+					<button type="button" class="btn btn-primary removeMachineModal" dataid="{{$val.dataid}}">删除</button>
+				</td>
+			</tr>
+		{{end}}
+    </table>
+</div>
+
+<!-- addMachine Modal -->
+<div class="modal fade" id="addMachineModal" tabindex="-1" role="dialog" aria-labelledby="addMachineModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="addMachineModalLabel">添加机器</h4>
+            </div>
+            <div class="modal-body">
+                <h5>机器名称</h5>
+                <input id="add-machine-name" class="form-control" type="text" placeholder="机器名称" style="width:300px;">
+                <h5>主机名</h5>
+                <input id="add-machine-hostname" class="form-control" type="text" placeholder="主机名" style="width:300px;">
+				<h5>主机IP</h5>
+                <input id="add-machine-ip" class="form-control" type="text" placeholder="主机IP" style="width:300px;">
+				<h5>运行账号</h5>
+                <input id="add-machine-account" class="form-control" type="text" placeholder="运行账号" style="width:300px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+                <button id="add-save-machine-params" type="button" class="btn btn-primary">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- edit Modal -->
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" aria-labelledby="editMachineModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="editMachineModal">编辑机器</h4>
+            </div>
+            <div class="modal-body">
+				<input id="edit_dataid" type="hidden" value="">
+				<h5>机器名称</h5>
+                <input id="edit-machine-name" class="form-control" type="text" placeholder="机器名称" style="width:300px;">
+                <h5>主机名</h5>
+                <input id="edit-machine-hostname" class="form-control" type="text" placeholder="主机名" style="width:300px;">
+				<h5>主机IP</h5>
+                <input id="edit-machine-ip" class="form-control" type="text" placeholder="主机IP" style="width:300px;">
+				<h5>运行账号</h5>
+                <input id="edit-machine-account" class="form-control" type="text" placeholder="运行账号" style="width:300px;">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				<button id="edit-machine" type="button" class="btn btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- remove Modal -->
+<div class="modal fade" id="removeModal" tabindex="-1" role="dialog" aria-labelledby="removeMachineModal">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title" id="removeMachineModal">删除机器</h4>
+            </div>
+            <div class="modal-body">
+				确定要删除机器?
+				<input id="remove_dataid" type="hidden" value="">
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
+				<button id="remove-machine" type="button" class="btn btn-primary">确定</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/jquery.min.js"></script>
+<script src="/static/js/bootstrap.min.js"></script>
+<script src="/static/js/toast.js"></script>
+
+<script>
+    var timet;
+    $(function(){
+        /** 点击 保存添加机器 */
+        $('#add-save-machine-params').click(function() {
+			var machine_name = $('#add-machine-name').val();
+			var machine_hostname = $('#add-machine-hostname').val();
+			var machine_ip = $('#add-machine-ip').val();
+			var machine_account = $('#add-machine-account').val();
+            var url = '/machine/add';
+            var data = {
+                machine_name: machine_name,
+				machine_hostname: machine_hostname,
+				machine_ip: machine_ip,
+				machine_account: machine_account
+            };
+            $.post(url, data, function (resp) {
+                if (resp.en != 200) {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).error();
+                } else {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).success();
+					setTimeout(function(){
+						window.location.reload();	
+					}, 1000);
+                }
+            });                   
+        });
+
+		/** "显示编辑" 触发模态框显示 */
+        $('.editMachineModal').on('click', function () {
+            var dataid = $(this).attr('dataid');
+			var dataname = $(this).attr('dataname');
+			var datahostname = $(this).attr('datahostname');
+			var dataip = $(this).attr('dataip');
+			var dataaccount = $(this).attr('dataaccount');
+            $('#edit_dataid').val(dataid);
+			$('#edit-machine-name').val(dataname);
+			$('#edit-machine-hostname').val(datahostname);
+			$('#edit-machine-ip').val(dataip);
+			$('#edit-machine-account').val(dataaccount);
+			$('#editModal').modal('show');
+        });
+
+		/** 点击 保存编辑机器 */
+        $('#edit-machine').click(function() {
+			var dataid = $('#edit_dataid').val();
+			var dataname = $('#edit-machine-name').val();
+			var datahostname = $('#edit-machine-hostname').val();
+			var dataip = $('#edit-machine-ip').val();
+			var dataaccount = $('#edit-machine-account').val();
+            var url = '/machine/edit';
+            var data = {
+                dataid: dataid,
+				machine_name: dataname,
+				machine_hostname: datahostname,
+				machine_ip: dataip,
+				machine_account: dataaccount
+            };
+            $.post(url, data, function (resp) {
+                if (resp.en != 200) {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).error();
+                } else {
+					new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).success();
+					setTimeout(function(){
+						window.location.reload();	
+					}, 1000);
+                }
+            });                   
+        });
+
+        /** "显示删除" 触发模态框显示 */
+        $('.removeMachineModal').on('click', function () {
+            var dataid = $(this).attr('dataid');
+            $('#remove_dataid').val(dataid);
+			$('#removeModal').modal('show');
+        });
+
+		/** 点击 删除机器 */
+        $('#remove-machine').click(function() {
+			var dataid = $('#remove_dataid').val();
+            var url = '/machine/remove';
+            var data = {
+                dataid: dataid
+            };
+            $.post(url, data, function (resp) {
+                if (resp.en != 200) {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).error();
+                } else {
+                    new Toast({context: $('body'), top: 200, time: 2000, message: resp.em}).success();
+					setTimeout(function(){
+						window.location.reload();	
+					}, 1000);
+                }
+            });                   
+        });
+
+    });
+</script>
+
+</body>
+</html>
