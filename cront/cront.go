@@ -4,6 +4,8 @@ import (
 	"cront/model"
 	"flag"
 	"fmt"
+	"net"
+	"net/rpc/jsonrpc"
 	"os"
 	"strings"
 	"sync"
@@ -36,16 +38,29 @@ func parseArgs() (string, string) {
 	return *host, *port
 }
 
+func connectCrond(host string, port string) *net.Conn {
+	conn, err := net.Dial("tcp", host+":"+port)
+	if err != nil {
+		fmt.Println(err.Error())
+	}
+	return &conn
+}
+
 func main() {
 	var wg sync.WaitGroup
 
 	host, port := parseArgs()
 
+	conn := connectCrond(host, port)
+	defer (*conn).Close()
+	client := jsonrpc.NewClient(*conn)
+	defer client.Close()
+
 	results := model.GetTaskData()
 	for _, result := range results {
 		for i := 0; i < 50; i++ {
 			wg.Add(1)
-			go model.PushToCrond(&wg, host, port, result)
+			model.PushToCrond(client, &wg, host, port, result)
 		}
 	}
 	wg.Wait()

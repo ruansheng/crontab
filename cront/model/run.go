@@ -3,32 +3,17 @@ package model
 import (
 	"cron/protocal"
 	//"encoding/json"
-	"fmt"
-	"net"
-	//"net/rpc"
 	"cron/utils"
-	"net/rpc/jsonrpc"
+	"fmt"
+	"net/rpc"
 	"sync"
 )
 
-func connectCrond(host string, port string) *net.Conn {
-	conn, err := net.Dial("tcp", host+":"+port)
-	if err != nil {
-		fmt.Println(err.Error())
-	}
-	return &conn
-}
-
-func PushToCrond(wg *sync.WaitGroup, host string, port string, taskinfo TaskInfo) bool {
+func PushToCrond(client *rpc.Client, wg *sync.WaitGroup, host string, port string, taskinfo TaskInfo) bool {
 	defer wg.Done()
 	if false == Parse(taskinfo.Exectime) {
 		return false
 	}
-
-	conn := connectCrond(host, port)
-	defer (*conn).Close()
-	client := jsonrpc.NewClient(*conn)
-	defer client.Close()
 
 	request := new(protocal.Request)
 	request.SetId(utils.UniqueId())
