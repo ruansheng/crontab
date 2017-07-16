@@ -18,23 +18,12 @@ func (t *ExecCron) RunShell(request *protocal.Request, response *protocal.Respon
 		fmt.Printf("%s\n", string(tmp))
 	}
 
-	ret := ExecCmd(request)
-
-	*response = *ret
-
-	jtmp, err2 := json.Marshal(response)
-	if err2 == nil {
-		utils.Write("INFO", string(jtmp))
-		fmt.Printf("%s\n", string(jtmp))
-	}
+	go ExecCmd(request)
 
 	return nil
 }
 
-func ExecCmd(request *protocal.Request) *protocal.Response {
-	response := new(protocal.Response)
-	response.SetId(request.GetId())
-
+func ExecCmd(request *protocal.Request) {
 	command := exec.Command("ssh", request.Machine, request.Cmd)
 	var out bytes.Buffer
 	command.Stdout = &out
@@ -42,18 +31,8 @@ func ExecCmd(request *protocal.Request) *protocal.Response {
 
 	if err != nil {
 		utils.Write("ERROR", err.Error())
-		fmt.Println("error:", err.Error())
-		response.SetEn("501")
-		response.SetEm("fail")
-		response.SetData(err.Error())
+		fmt.Println("error output:", err.Error())
 	} else {
-		response.SetEn("200")
-		response.SetEm("success")
-		response.SetData(out.String())
+		fmt.Println("success output:", out.String())
 	}
-
-	utils.Write("INFO", out.String())
-	fmt.Println("output:", out.String())
-
-	return response
 }
