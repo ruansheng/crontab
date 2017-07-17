@@ -4,9 +4,10 @@ import (
 	"bytes"
 	"cron/protocal"
 	"cron/utils"
+	"crond/model"
 	"encoding/json"
-	"fmt"
 	"os/exec"
+	"time"
 )
 
 type ExecCron int
@@ -15,10 +16,13 @@ func (t *ExecCron) RunShell(request *protocal.Request, response *protocal.Respon
 	tmp, err1 := json.Marshal(request)
 	if err1 == nil {
 		utils.Write("INFO", string(tmp))
-		fmt.Printf("%s\n", string(tmp))
 	}
 
 	go ExecCmd(request)
+
+	response.SetId(request.GetId())
+	response.SetEn(200)
+	response.SetEm("success")
 
 	return nil
 }
@@ -29,10 +33,18 @@ func ExecCmd(request *protocal.Request) {
 	command.Stdout = &out
 	err := command.Run()
 
+	var flag int
+	var output string
 	if err != nil {
-		utils.Write("ERROR", err.Error())
-		fmt.Println("error output:", err.Error())
+		flag = -1
+		output = err.Error()
+		utils.Write("ERROR", output)
 	} else {
-		fmt.Println("success output:", out.String())
+		flag = 1
+		output = out.String()
+		utils.Write("INFO", output)
 	}
+
+	// add runlog
+	model.AddRunLog(request.GetId(), flag, time.Now().Unix(), output)
 }
