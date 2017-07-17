@@ -49,14 +49,19 @@ func connectCrond(host string, port string) *net.Conn {
 func main() {
 	var wg sync.WaitGroup
 
+	// parse args
 	host, port := parseArgs()
 
+	// jsonrpc client
 	conn := connectCrond(host, port)
 	defer (*conn).Close()
 	client := jsonrpc.NewClient(*conn)
 	defer client.Close()
 
+	// get tasks
 	results := model.GetTaskData()
+
+	// push to crond
 	for _, result := range results {
 		for i := 0; i < 50; i++ {
 			wg.Add(1)

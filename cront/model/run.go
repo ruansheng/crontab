@@ -2,11 +2,11 @@ package model
 
 import (
 	"cron/protocal"
-	//"encoding/json"
 	"cron/utils"
 	"fmt"
 	"net/rpc"
 	"sync"
+	"time"
 )
 
 func PushToCrond(client *rpc.Client, wg *sync.WaitGroup, host string, port string, taskinfo TaskInfo) bool {
@@ -20,7 +20,7 @@ func PushToCrond(client *rpc.Client, wg *sync.WaitGroup, host string, port strin
 	request.SetUser("root")
 	request.SetMachine("rs")
 	request.SetCmd(taskinfo.Cmd)
-	request.SetTime("1384534678")
+	request.SetTime(time.Now().Unix())
 
 	var response protocal.Response
 
@@ -29,6 +29,6 @@ func PushToCrond(client *rpc.Client, wg *sync.WaitGroup, host string, port strin
 		fmt.Println(err)
 	}
 
-	fmt.Printf("Id: %s  En: %s  En: %s Data: %s\n", response.GetId(), response.GetEn(), response.GetEm(), response.GetData())
+	fmt.Printf("Id: %s  En: %d  En: %s\n", response.GetId(), response.GetEn(), response.GetEm())
 	return true
 }
