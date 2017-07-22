@@ -42,6 +42,7 @@ func main() {
 
 	fmt.Println(host, port)
 
+	// time ticker
 	timer := time.NewTicker(1 * time.Second)
 	var now time.Time
 	for {
