@@ -2,7 +2,7 @@ package protocal
 
 type Response struct {
 	Id   string      `json:"id"`
-	En   string      `json:"en"`
+	En   int         `json:"en"`
 	Em   string      `json:"em"`
 	Data interface{} `json:"data"`
 }
@@ -15,11 +15,11 @@ func (resp *Response) GetId() string {
 	return resp.Id
 }
 
-func (resp *Response) SetEn(en string) {
+func (resp *Response) SetEn(en int) {
 	resp.En = en
 }
 
-func (resp *Response) GetEn() string {
+func (resp *Response) GetEn() int {
 	return resp.En
 }
 

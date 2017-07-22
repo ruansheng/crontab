@@ -5,7 +5,7 @@ type Request struct {
 	Machine string `json:"machine"`
 	User    string `json:"user"`
 	Cmd     string `json:"cmd"`
-	Time    string `json:"time"`
+	Time    int64  `json:"time"`
 }
 
 func (resq *Request) SetId(id string) {
@@ -40,10 +40,10 @@ func (resq *Request) GetCmd() string {
 	return resq.Cmd
 }
 
-func (resq *Request) SetTime(time string) {
+func (resq *Request) SetTime(time int64) {
 	resq.Time = time
 }
 
-func (resq *Request) GetTime() string {
+func (resq *Request) GetTime() int64 {
 	return resq.Time
 }
