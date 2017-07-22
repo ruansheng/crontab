@@ -8,10 +8,11 @@ import (
 )
 
 type TaskInfo struct {
-	Id       bson.ObjectId `bson:"_id"`
-	Name     string
-	Exectime string
-	Cmd      string
+	Id        bson.ObjectId `bson:"_id"`
+	Name      string
+	Exectime  string
+	Cmd       string
+	Machineid string
 }
 
 func GetTasks() []TaskInfo {
@@ -30,8 +31,8 @@ func GetTasks() []TaskInfo {
 	return results
 }
 
-func AddTask(name string, exectime string, cmd string) bool {
-	fmt.Println("AddTask info:", name, cmd, exectime)
+func AddTask(name string, exectime string, cmd string, machineid string) bool {
+	fmt.Println("AddTask info:", name, cmd, exectime, machineid)
 
 	c, session, err := libs.GetMongoClient("task")
 	defer session.Close()
@@ -39,7 +40,7 @@ func AddTask(name string, exectime string, cmd string) bool {
 		panic(err)
 	}
 
-	info := TaskInfo{bson.NewObjectId(), name, exectime, cmd}
+	info := TaskInfo{bson.NewObjectId(), name, exectime, cmd, machineid}
 	err = c.Insert(&info)
 	if err != nil {
 		fmt.Println(err)
@@ -47,8 +48,8 @@ func AddTask(name string, exectime string, cmd string) bool {
 	return true
 }
 
-func EditTask(dataid string, name string, exectime string, cmd string) bool {
-	fmt.Println("EditTask info:", dataid, name, cmd, exectime)
+func EditTask(dataid string, name string, exectime string, cmd string, machineid string) bool {
+	fmt.Println("EditTask info:", dataid, name, cmd, exectime, machineid)
 
 	c, session, err := libs.GetMongoClient("task")
 	defer session.Close()
@@ -57,7 +58,7 @@ func EditTask(dataid string, name string, exectime string, cmd string) bool {
 	}
 
 	query := bson.M{"_id": bson.ObjectIdHex(dataid)}
-	data := bson.M{"$set": bson.M{"name": name, "exectime": exectime, "cmd": cmd}}
+	data := bson.M{"$set": bson.M{"name": name, "exectime": exectime, "cmd": cmd, "machineid": machineid}}
 	err = c.Update(query, data)
 	if err != nil {
 		fmt.Println(err)

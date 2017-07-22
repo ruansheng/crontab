@@ -51,9 +51,9 @@
         </tr>
 		{{range $key, $val := .list}}
 			<tr class="active">
-				<td>{{$val.name}}</td>
-				<td>{{$val.phonenumber}}</td>
-				<td>{{$val.email}}</td>
+				<td style="height:100%;line-height:200%;">{{$val.name}}</td>
+				<td style="height:100%;line-height:200%;">{{$val.phonenumber}}</td>
+				<td style="height:100%;line-height:200%;">{{$val.email}}</td>
 				<td>
 					<button type="button" class="btn btn-primary editAccountModal" dataid="{{$val.dataid}}" dataname="{{$val.name}}" dataphonenumber="{{$val.phonenumber}}" dataemail="{{$val.email}}">编辑</button>
 					<button type="button" class="btn btn-primary removeAccountModal" dataid="{{$val.dataid}}">删除</button>

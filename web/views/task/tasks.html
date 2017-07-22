@@ -52,12 +52,12 @@
         </tr>
 		{{range $key, $val := .list}}
 			<tr class="active">
-				<td>{{$val.name}}</td>
-				<td>{{$val.exectime}}</td>
-				<td>{{$val.cmd}}</td>	
-				<td>localhost</td>
+				<td style="height:100%;line-height:200%;">{{$val.name}}</td>
+				<td style="height:100%;line-height:200%;">{{$val.exectime}}</td>
+				<td style="height:100%;line-height:200%;">{{$val.cmd}}</td>	
+				<td style="height:100%;line-height:200%;">{{$val.machine_name}}</td>
 				<td>
-					<button type="button" class="btn btn-primary editTaskModal" dataid="{{$val.dataid}}" dataname="{{$val.name}}" dataexectime="{{$val.exectime}}" datacmd="{{$val.cmd}}">编辑</button>
+					<button type="button" class="btn btn-primary editTaskModal" dataid="{{$val.dataid}}" dataname="{{$val.name}}" dataexectime="{{$val.exectime}}" datacmd="{{$val.cmd}}" datamachineid="{{$val.machineid}}">编辑</button>
 					<button type="button" class="btn btn-primary removeTaskModal" dataid="{{$val.dataid}}">删除</button>
 				</td>
 			</tr>
@@ -78,8 +78,15 @@
                 <input id="add-task-name" class="form-control" type="text" placeholder="任务名称" style="width:300px;">
                 <h5>执行时间</h5>
                 <input id="add-task-exectime" class="form-control" type="text" placeholder="执行时间" style="width:300px;">
-				<h5>命令</h5>
-                <input id="add-task-cmd" class="form-control" type="text" placeholder="命令" style="width:300px;">
+				<h5>执行命令</h5>
+                <input id="add-task-cmd" class="form-control" type="text" placeholder="执行命令" style="width:300px;">
+               <h5>执行机器</h5>
+                <select id="add-task-machineid" class="form-control" style="width:300px;">
+                    <option value="all">请选择机器</option>
+					{{range $mkey, $mval := .machines}}
+                   	 <option value="{{$mkey}}">{{$mval.Name}}</option>
+					{{end}}
+                </select>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -105,6 +112,13 @@
                 <input id="edit-task-exectime" class="form-control" type="text" placeholder="执行时间" style="width:300px;">
 				<h5>命令</h5>
                 <input id="edit-task-cmd" class="form-control" type="text" placeholder="命令" style="width:300px;">
+				<h5>执行机器</h5>
+                <select id="edit-task-machineid" class="form-control" style="width:300px;">
+                    <option value="all">请选择机器</option>
+					{{range $mkey, $mval := .machines}}
+                   	 <option value="{{$mkey}}">{{$mval.Name}}</option>
+					{{end}}
+                </select>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-default" data-dismiss="modal">关闭</button>
@@ -145,11 +159,13 @@
 			var task_name = $('#add-task-name').val();
 			var task_exectime = $('#add-task-exectime').val();
 			var task_cmd = $('#add-task-cmd').val();
+			var task_machineid = $('#add-task-machineid').val();
             var url = '/task/add';
             var data = {
                 task_name: task_name,
 				task_exectime: task_exectime,
 				task_cmd: task_cmd,
+				task_machineid: task_machineid,
             };
             $.post(url, data, function (resp) {
                 if (resp.en != 200) {
@@ -169,10 +185,14 @@
 			var dataname = $(this).attr('dataname');
 			var dataexectime = $(this).attr('dataexectime');
 			var datacmd = $(this).attr('datacmd');
+			var datamachineid = $(this).attr('datamachineid');
             $('#edit_dataid').val(dataid);
 			$('#edit-task-name').val(dataname);
 			$('#edit-task-exectime').val(dataexectime);
 			$('#edit-task-cmd').val(datacmd);
+			if(datamachineid != "") {
+				$('#edit-task-machineid option[value='+datamachineid+']').attr("selected", true);	
+			}
 			$('#editModal').modal('show');
         });
 		
@@ -182,12 +202,14 @@
 			var dataname = $('#edit-task-name').val();
 			var dataexectime = $('#edit-task-exectime').val();
 			var datacmd = $('#edit-task-cmd').val();
+			var datamachineid = $('#edit-task-machineid').val();
             var url = '/task/edit';
             var data = {
                 dataid: dataid,
 				task_name: dataname,
 				task_exectime: dataexectime,
 				task_cmd: datacmd,
+				task_machineid: datamachineid,
             };
 			console.log(data);
             $.post(url, data, function (resp) {

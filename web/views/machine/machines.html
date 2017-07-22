@@ -50,11 +50,11 @@
 			<td style="width:20%;">操作</td>
         </tr>
 		{{range $key, $val := .list}}
-			<tr class="info">
-				<td>{{$val.name}}</td>
-				<td>{{$val.hostname}}</td>
-				<td>{{$val.ip}}</td>	
-				<td>{{$val.account}}</td>
+			<tr class="active">
+				<td style="height:100%;line-height:200%;">{{$val.name}}</td>
+				<td style="height:100%;line-height:200%;">{{$val.hostname}}</td>
+				<td style="height:100%;line-height:200%;">{{$val.ip}}</td>	
+				<td style="height:100%;line-height:200%;">{{$val.account}}</td>
 				<td>
 					<button type="button" class="btn btn-primary editMachineModal" dataid="{{$val.dataid}}" dataname="{{$val.name}}" datahostname="{{$val.hostname}}" dataip="{{$val.ip}}" dataaccount="{{$val.account}}">编辑</button>
 					<button type="button" class="btn btn-primary removeMachineModal" dataid="{{$val.dataid}}">删除</button>
