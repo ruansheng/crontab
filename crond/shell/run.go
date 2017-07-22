@@ -6,6 +6,7 @@ import (
 	"cron/utils"
 	"crond/model"
 	"encoding/json"
+	"fmt"
 	"os/exec"
 	"time"
 )
@@ -28,7 +29,10 @@ func (t *ExecCron) RunShell(request *protocal.Request, response *protocal.Respon
 }
 
 func ExecCmd(request *protocal.Request) {
-	command := exec.Command("ssh", request.Machine, request.Cmd)
+	now_time := time.Unix(time.Now().Unix(), 0).Format("2006-01-02 15:04:05")
+	fmt.Println("start run task :", request.GetId(), now_time)
+
+	command := exec.Command("ssh", request.GetMachine(), request.GetCmd())
 	var out bytes.Buffer
 	command.Stdout = &out
 	err := command.Run()
