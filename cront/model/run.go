@@ -20,14 +20,17 @@ func DoTask(host string, port string) {
 	client := jsonrpc.NewClient(*conn)
 	defer client.Close()
 
+	// get machines
+	machines := getMachinesMap()
+
 	// get tasks
-	results := GetTaskData()
+	taskinfos := GetTaskData()
 
 	// push to crond
-	for _, result := range results {
-		for i := 0; i < 50; i++ {
+	for _, taskinfo := range taskinfos {
+		if checkIsRun(taskinfo, machines) {
 			wg.Add(1)
-			PushToCrond(client, &wg, host, port, result)
+			PushToCrond(client, &wg, host, port, taskinfo, machines)
 		}
 	}
 	wg.Wait()
@@ -41,7 +44,12 @@ func connectCrond(host string, port string) *net.Conn {
 	return &conn
 }
 
-func PushToCrond(client *rpc.Client, wg *sync.WaitGroup, host string, port string, taskinfo TaskInfo) bool {
+func checkIsRun(taskinfo TaskInfo, machines map[string]MachineInfo) bool {
+	// check is run
+	return true
+}
+
+func PushToCrond(client *rpc.Client, wg *sync.WaitGroup, host string, port string, taskinfo TaskInfo, machines map[string]MachineInfo) bool {
 	defer wg.Done()
 	if false == Parse(taskinfo.Exectime) {
 		return false
